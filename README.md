@@ -23,7 +23,7 @@ rastreabilidade e reprocessamento.
 1. Criar o banco Firebird 3 (exemplo):
 
 ```sql
-CREATE DATABASE 'C:\Dados\TESTE_NFE.FDB'
+CREATE DATABASE 'C:\Dados\BANCO.FDB'
 USER 'SYSDBA'
 PASSWORD 'masterkey'
 PAGE_SIZE 16384
