@@ -1,0 +1,99 @@
+unit uDocumentoNfeItemDAO;
+
+interface
+
+uses
+  System.SysUtils,
+  FireDAC.Comp.Client,
+  uDocumentoNfeItemDTO;
+
+type
+  TDocumentoNfeItemDAO = class
+  private
+    FConexao: TFDConnection;
+    function obterProximoID: Integer;
+  public
+    constructor Create(AConexao: TFDConnection);
+
+    function gravarItem(pDocumentoNfeItemDTO: TDocumentoNfeItemDTO): Integer;
+    procedure excluirItensDocumento(pID_DOCUMENTO: Integer);
+  end;
+
+implementation
+
+constructor TDocumentoNfeItemDAO.Create(AConexao: TFDConnection);
+begin
+  FConexao := AConexao;
+end;
+
+function TDocumentoNfeItemDAO.obterProximoID: Integer;
+var
+  qrSql: TFDQuery;
+begin
+  try
+    qrSql := TFDQuery.Create(nil);
+    qrSql.Connection := FConexao;
+
+    qrSql.SQL.Clear;
+    qrSql.SQL.Add('SELECT NEXT VALUE FOR GEN_DOCUMENTO_NFE_ITEM FROM RDB$DATABASE');
+    qrSql.Open;
+    Result := qrSql.Fields[0].AsInteger;
+  finally
+    qrSql.Free;
+  end;
+end;
+
+function TDocumentoNfeItemDAO.gravarItem(pDocumentoNfeItemDTO: TDocumentoNfeItemDTO): Integer;
+var
+  qrSql: TFDQuery;
+begin
+  try
+    qrSql := TFDQuery.Create(nil);
+    qrSql.Connection := FConexao;
+
+    qrSql.SQL.Clear;
+    qrSql.SQL.Add('INSERT INTO DOCUMENTO_NFE_ITEM (');
+    qrSql.SQL.Add('  ID_ITEM, ID_DOCUMENTO, ITEM, DESCRICAO, NCM,');
+    qrSql.SQL.Add('  QUANTIDADE, VL_UNITARIO, VL_TOTAL');
+    qrSql.SQL.Add(') VALUES (');
+    qrSql.SQL.Add('  :ID, :ID_DOC, :ITEM, :DESC, :NCM, :QTD, :VL_UNIT, :VL_TOTAL');
+    qrSql.SQL.Add(')');
+
+    qrSql.ParamByName('ID').AsInteger := obterProximoID;
+    qrSql.ParamByName('ID_DOC').AsInteger := pDocumentoNfeItemDTO.ID_DOCUMENTO;
+    qrSql.ParamByName('ITEM').AsInteger := pDocumentoNfeItemDTO.ITEM;
+    qrSql.ParamByName('DESC').AsString := pDocumentoNfeItemDTO.DESCRICAO;
+    qrSql.ParamByName('NCM').AsString := pDocumentoNfeItemDTO.NCM;
+    qrSql.ParamByName('QTD').AsFloat := pDocumentoNfeItemDTO.QUANTIDADE;
+    qrSql.ParamByName('VL_UNIT').AsCurrency := pDocumentoNfeItemDTO.VL_UNITARIO;
+    qrSql.ParamByName('VL_TOTAL').AsCurrency := pDocumentoNfeItemDTO.VL_TOTAL;
+
+    qrSql.ExecSQL;
+  finally
+    qrSql.Free;
+  end;
+end;
+
+procedure TDocumentoNfeItemDAO.excluirItensDocumento(pID_DOCUMENTO: Integer);
+var
+  qrSql: TFDQuery;
+begin
+  try
+    qrSql := TFDQuery.Create(nil);
+    qrSql.Connection := FConexao;
+
+    qrSql.SQL.Clear;
+    qrSql.SQL.Add('DELETE FROM DOCUMENTO_NFE_ITEM WHERE ID_DOCUMENTO = :ID');
+    qrSql.ParamByName('ID').AsInteger := pID_DOCUMENTO;
+    qrSql.ExecSQL;
+  finally
+    qrSql.Free;
+  end;
+end;
+
+end.
+
+
+
+
+

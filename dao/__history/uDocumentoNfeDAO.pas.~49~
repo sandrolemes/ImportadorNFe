@@ -1,0 +1,254 @@
+unit uDocumentoNfeDAO;
+
+interface
+
+uses
+  System.SysUtils,
+  System.Classes,
+  FireDAC.Comp.Client,
+  uDocumentoNfeDTO,
+  uDocumentoNfeItemDTO;
+
+type
+  TDocumentoNfeDAO = class
+  private
+    FConexao: TFDConnection;
+    function obterProximoID: Integer;
+  public
+    constructor Create(AConexao: TFDConnection);
+
+    function obterDocumentoPorChave(const pChaveAcesso: string; pDocNfeDTO: TDocumentoNfeDTO): Boolean;
+    function obterDocumentoPorID(pIdDocumento: Integer; pDocNfeDTO: TDocumentoNfeDTO): Boolean;
+    function gravarDocumento(pDocNfeDTO: TDocumentoNfeDTO): Integer;
+    procedure excluirDocumento(pIdDocumento: Integer);
+  end;
+
+implementation
+
+constructor TDocumentoNfeDAO.Create(AConexao: TFDConnection);
+begin
+  FConexao := AConexao;
+end;
+
+function TDocumentoNfeDAO.obterProximoID: Integer;
+var
+  qrSql: TFDQuery;
+begin
+  try
+    qrSql := TFDQuery.Create(nil);
+    qrSql.Connection := FConexao;
+
+    qrSql.SQL.Clear;
+    qrSql.SQL.Add('SELECT NEXT VALUE FOR GEN_DOCUMENTO_NFE FROM RDB$DATABASE');
+    qrSql.Open;
+    Result := qrSql.Fields[0].AsInteger;
+  finally
+    qrSql.Free;
+  end;
+end;
+
+function TDocumentoNfeDAO.obterDocumentoPorChave(const pChaveAcesso: string; pDocNfeDTO: TDocumentoNfeDTO): Boolean;
+var
+  qrSql: TFDQuery;
+begin
+  Result := False;
+  try
+    qrSql := TFDQuery.Create(nil);
+    qrSql.Connection := FConexao;
+
+    qrSql.SQL.Clear;
+    qrSql.SQL.Add('SELECT * FROM DOCUMENTO_NFE WHERE CHAVE_ACESSO = :CHAVE_ACESSO');
+    qrSql.ParamByName('CHAVE_ACESSO').AsString := pChaveAcesso;
+    qrSql.Open;
+
+    if not qrSql.IsEmpty then
+    begin
+      pDocNfeDTO.ID_DOCUMENTO  := qrSql.FieldByName('ID_DOCUMENTO').AsInteger;
+      pDocNfeDTO.CHAVE_ACESSO  := qrSql.FieldByName('CHAVE_ACESSO').AsString;
+      pDocNfeDTO.NUMERO        := qrSql.FieldByName('NUMERO').AsString;
+      pDocNfeDTO.SERIE         := qrSql.FieldByName('SERIE').AsString;
+      pDocNfeDTO.DT_EMISSAO    := qrSql.FieldByName('DT_EMISSAO').AsDateTime;
+      pDocNfeDTO.EMIT_CNPJ_CPF := qrSql.FieldByName('EMIT_CNPJ_CPF').AsString;
+      pDocNfeDTO.EMIT_RAZAO    := qrSql.FieldByName('EMIT_RAZAO').AsString;
+      pDocNfeDTO.DEST_CNPJ_CPF := qrSql.FieldByName('DEST_CNPJ_CPF').AsString;
+      pDocNfeDTO.DEST_RAZAO    := qrSql.FieldByName('DEST_RAZAO').AsString;
+      pDocNfeDTO.VL_TOTAL      := qrSql.FieldByName('VL_TOTAL').AsCurrency;
+      pDocNfeDTO.STATUS_PROC   := qrSql.FieldByName('STATUS_PROC').AsString;
+      pDocNfeDTO.MSG_STATUS    := qrSql.FieldByName('MSG_STATUS').AsString;
+      pDocNfeDTO.ARQUIVO_NOME  := qrSql.FieldByName('ARQUIVO_NOME').AsString;
+      pDocNfeDTO.XML_CONTEUDO  := qrSql.FieldByName('XML_CONTEUDO').AsString;
+      pDocNfeDTO.DT_IMPORTACAO := qrSql.FieldByName('DT_IMPORTACAO').AsDateTime;
+      Result := True;
+    end;
+  finally
+    qrSql.Free;
+  end;
+end;
+
+function TDocumentoNfeDAO.obterDocumentoPorID(pIdDocumento: Integer; pDocNfeDTO: TDocumentoNfeDTO): Boolean;
+var
+  qrSql: TFDQuery;
+  qryItens: TFDQuery;
+  docNFeItemDTO: TDocumentoNfeItemDTO;
+begin
+  Result := False;
+  try
+    qrSql := TFDQuery.Create(nil);
+    qrSql.Connection := FConexao;
+
+    qryItens := TFDQuery.Create(nil);
+    qryItens.Connection := FConexao;
+
+    qrSql.SQL.Clear;
+    qrSql.SQL.Add('SELECT * FROM DOCUMENTO_NFE WHERE ID_DOCUMENTO = :ID_DOCUMENTO');
+    qrSql.ParamByName('ID_DOCUMENTO').AsInteger := pIdDocumento;
+    qrSql.Open;
+
+    if not qrSql.IsEmpty then
+    begin
+      pDocNfeDTO.ID_DOCUMENTO  := qrSql.FieldByName('ID_DOCUMENTO').AsInteger;
+      pDocNfeDTO.CHAVE_ACESSO  := qrSql.FieldByName('CHAVE_ACESSO').AsString;
+      pDocNfeDTO.NUMERO        := qrSql.FieldByName('NUMERO').AsString;
+      pDocNfeDTO.SERIE         := qrSql.FieldByName('SERIE').AsString;
+      pDocNfeDTO.DT_EMISSAO    := qrSql.FieldByName('DT_EMISSAO').AsDateTime;
+      pDocNfeDTO.EMIT_CNPJ_CPF := qrSql.FieldByName('EMIT_CNPJ_CPF').AsString;
+      pDocNfeDTO.EMIT_RAZAO    := qrSql.FieldByName('EMIT_RAZAO').AsString;
+      pDocNfeDTO.DEST_CNPJ_CPF := qrSql.FieldByName('DEST_CNPJ_CPF').AsString;
+      pDocNfeDTO.DEST_RAZAO    := qrSql.FieldByName('DEST_RAZAO').AsString;
+      pDocNfeDTO.VL_TOTAL      := qrSql.FieldByName('VL_TOTAL').AsCurrency;
+      pDocNfeDTO.STATUS_PROC   := qrSql.FieldByName('STATUS_PROC').AsString;
+      pDocNfeDTO.MSG_STATUS    := qrSql.FieldByName('MSG_STATUS').AsString;
+      pDocNfeDTO.ARQUIVO_NOME  := qrSql.FieldByName('ARQUIVO_NOME').AsString;
+      pDocNfeDTO.XML_CONTEUDO  := qrSql.FieldByName('XML_CONTEUDO').AsString;
+      pDocNfeDTO.DT_IMPORTACAO := qrSql.FieldByName('DT_IMPORTACAO').AsDateTime;
+
+
+      qryItens.SQL.Clear;
+      qryItens.SQL.Add('SELECT');
+      qryItens.SQL.Add('  ITEM,');
+      qryItens.SQL.Add('  DESCRICAO,');
+      qryItens.SQL.Add('  NCM,');
+      qryItens.SQL.Add('  QUANTIDADE,');
+      qryItens.SQL.Add('  VL_UNITARIO,');
+      qryItens.SQL.Add('  VL_TOTAL');
+      qryItens.SQL.Add('FROM DOCUMENTO_NFE_ITEM');
+      qryItens.SQL.Add('WHERE ID_DOCUMENTO = :ID_DOCUMENTO');
+      qryItens.SQL.Add('ORDER BY ITEM');
+      qryItens.ParamByName('ID_DOCUMENTO').AsInteger := pIdDocumento;
+      qryItens.Open;
+
+      while not qryItens.Eof do
+      begin
+        docNFeItemDTO := TDocumentoNfeItemDTO.Create;
+
+        docNFeItemDTO.ITEM := qryItens.FieldByName('ITEM').AsInteger;
+        docNFeItemDTO.DESCRICAO := qryItens.FieldByName('DESCRICAO').AsString;
+        docNFeItemDTO.NCM := qryItens.FieldByName('NCM').AsString;
+        docNFeItemDTO.QUANTIDADE := qryItens.FieldByName('QUANTIDADE').AsFloat;
+        docNFeItemDTO.VL_UNITARIO := qryItens.FieldByName('VL_UNITARIO').AsFloat;
+        docNFeItemDTO.VL_TOTAL := qryItens.FieldByName('VL_TOTAL').AsFloat;
+
+        pDocNfeDTO.LISTA_ITENS.Add( docNFeItemDTO );
+
+        qryItens.Next;
+      end;
+
+      Result := True;
+    end;
+  finally
+    qryItens.Free;
+    qrSql.Free;
+  end;
+end;
+
+function TDocumentoNfeDao.gravarDocumento(pDocNfeDto: TDocumentoNfeDto): Integer;
+var
+  qrSql: TFDQuery;
+begin
+  Result := 0;
+  try
+    qrSql := TFDQuery.Create(nil);
+    qrSql.Connection := FConexao;
+
+    qrSql.SQL.Clear;
+
+    if Trim(pDocNfeDto.CHAVE_ACESSO) <> EmptyStr then
+    begin
+      qrSql.SQL.Add('UPDATE documento_nfe SET');
+      qrSql.SQL.Add('  numero = :numero,');
+      qrSql.SQL.Add('  serie = :serie,');
+      qrSql.SQL.Add('  dt_emissao = :dt_emissao,');
+      qrSql.SQL.Add('  emit_cnpj_cpf = :emit_cnpj_cpf,');
+      qrSql.SQL.Add('  emit_razao = :emit_razao,');
+      qrSql.SQL.Add('  dest_cnpj_cpf = :dest_cnpj_cpf,');
+      qrSql.SQL.Add('  dest_razao = :dest_razao,');
+      qrSql.SQL.Add('  vl_total = :vl_total,');
+      qrSql.SQL.Add('  status_proc = :status_proc,');
+      qrSql.SQL.Add('  msg_status = :msg_status,');
+      qrSql.SQL.Add('  arquivo_nome = :arquivo_nome,');
+      qrSql.SQL.Add('  xml_conteudo = :xml_conteudo,');
+      qrSql.SQL.Add('  dt_importacao = :dt_importacao');
+      qrSql.SQL.Add('WHERE chave_acesso = :chave_acesso');
+
+      Result := pDocNfeDto.CHAVE_ACESSO;
+      qrSql.ParamByName('chave_acesso').AsString := Result;
+    end
+    else
+    begin
+      qrSql.SQL.Add('INSERT INTO documento_nfe (');
+      qrSql.SQL.Add('  id_documento, chave_acesso, numero, serie, dt_emissao,');
+      qrSql.SQL.Add('  emit_cnpj_cpf, emit_razao, dest_cnpj_cpf, dest_razao,');
+      qrSql.SQL.Add('  vl_total, status_proc, msg_status, arquivo_nome,');
+      qrSql.SQL.Add('  xml_conteudo, dt_importacao');
+      qrSql.SQL.Add(') VALUES (');
+      qrSql.SQL.Add('  :id_documento, :chave_acesso, :numero, :serie, :dt_emissao,');
+      qrSql.SQL.Add('  :emit_cnpj_cpf, :emit_razao, :dest_cnpj_cpf, :dest_razao,');
+      qrSql.SQL.Add('  :vl_total, :status_proc, :msg_status, :arquivo_nome,');
+      qrSql.SQL.Add('  :xml_conteudo, :dt_importacao');
+      qrSql.SQL.Add(')');
+
+      qrSql.ParamByName('id_documento').AsInteger := obterProximoId;
+      qrSql.ParamByName('chave_acesso').AsString := pDocNfeDto.CHAVE_ACESSO;
+    end;
+
+    qrSql.ParamByName('numero').AsString := pDocNfeDto.NUMERO;
+    qrSql.ParamByName('serie').AsString := pDocNfeDto.SERIE;
+    qrSql.ParamByName('dt_emissao').AsDateTime := pDocNfeDto.DT_EMISSAO;
+    qrSql.ParamByName('emit_cnpj_cpf').AsString := pDocNfeDto.EMIT_CNPJ_CPF;
+    qrSql.ParamByName('emit_razao').AsString := pDocNfeDto.EMIT_RAZAO;
+    qrSql.ParamByName('dest_cnpj_cpf').AsString := pDocNfeDto.DEST_CNPJ_CPF;
+    qrSql.ParamByName('dest_razao').AsString := pDocNfeDto.DEST_RAZAO;
+    qrSql.ParamByName('vl_total').AsCurrency := pDocNfeDto.VL_TOTAL;
+    qrSql.ParamByName('status_proc').AsString := pDocNfeDto.STATUS_PROC;
+    qrSql.ParamByName('msg_status').AsString := pDocNfeDto.MSG_STATUS;
+    qrSql.ParamByName('arquivo_nome').AsString := pDocNfeDto.ARQUIVO_NOME;
+    qrSql.ParamByName('xml_conteudo').AsString := pDocNfeDto.XML_CONTEUDO;
+    qrSql.ParamByName('dt_importacao').AsDateTime := pDocNfeDto.DT_IMPORTACAO;
+
+    qrSql.ExecSQL;
+  finally
+    qrSql.Free;
+  end;
+end;
+
+
+procedure TDocumentoNfeDAO.excluirDocumento(pIdDocumento: Integer);
+var
+  qrSql: TFDQuery;
+begin
+  try
+    qrSql := TFDQuery.Create(nil);
+    qrSql.Connection := FConexao;
+
+    qrSql.SQL.Clear;
+    qrSql.SQL.Add('DELETE FROM DOCUMENTO_NFE WHERE ID_DOCUMENTO = :ID_DOCUMENTO');
+    qrSql.ParamByName('ID_DOCUMENTO').AsInteger := pIdDocumento;
+    qrSql.ExecSQL;
+  finally
+    qrSql.Free;
+  end;
+end;
+
+end.
+
+

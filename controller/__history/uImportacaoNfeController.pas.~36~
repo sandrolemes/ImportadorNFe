@@ -1,0 +1,161 @@
+﻿unit uImportacaoNfeController;
+
+interface
+
+uses
+  System.SysUtils,
+  System.Classes,
+  FireDAC.Comp.Client,
+  uDocumentoNfeDTO,
+  uDocumentoNfeItemDTO,
+  uDocumentoEventoDTO;
+
+type
+  TImportacaoNfeController = class
+  private
+    FConexao: TFDConnection;
+    procedure RegistrarEvento(pIdDocumento: Integer; const pTipoEvento, pStatusAntes, pStatusDepois, pMensagem, pDetalhe: string);
+  public
+    constructor Create(pConexao: TFDConnection);
+
+    function importarXml(const pArquivo: string): Integer;
+    procedure Reprocessar(pIdDocumento: Integer);
+  end;
+
+implementation
+
+uses
+  uDocumentoNfeDAO,
+  uDocumentoNfeItemDAO,
+  uDocumentoEventoDAO,
+  uNfeXmlParser,
+  uStatusProcessamento;
+
+constructor TImportacaoNfeController.Create(pConexao: TFDConnection);
+begin
+  FConexao := pConexao;
+end;
+
+procedure TImportacaoNfeController.RegistrarEvento(pIdDocumento: Integer; const pTipoEvento, pStatusAntes, pStatusDepois, pMensagem, pDetalhe: string);
+var
+  docEventoDAO: TDocumentoEventoDAO;
+  docEventoDTO: TDocumentoEventoDTO;
+begin
+  try
+    docEventoDAO := TDocumentoEventoDAO.Create(FConexao);
+    docEventoDTO := TDocumentoEventoDTO.Create;
+
+    docEventoDTO.ID_DOCUMENTO := pIdDocumento;
+    docEventoDTO.DT_EVENTO := Now;
+    docEventoDTO.TIPO_EVENTO := pTipoEvento;
+    docEventoDTO.STATUS_ANTES := pStatusAntes;
+    docEventoDTO.STATUS_DEPOIS := pStatusDepois;
+    docEventoDTO.MENSAGEM := pMensagem;
+    docEventoDTO.DETALHE := pDetalhe;
+    docEventoDTO.USUARIO := USUARIO_EVENTO_PADRAO;
+    docEventoDAO.gravarEvento(docEventoDTO);
+  finally
+    docEventoDTO.Free;
+    docEventoDAO.Free;
+  end;
+end;
+
+function TImportacaoNfeController.importarXml(const pArquivo: string): Integer;
+var
+  docNFeDAO: TDocumentoNfeDAO;
+  infeIemDAO: TDocumentoNfeItemDAO;
+  docNFeDTO: TDocumentoNfeDTO;
+  i: Integer;
+begin
+  Result := 0;
+  try
+    docNFeDTO := TDocumentoNfeDTO.Create;
+    docNFeDAO := TDocumentoNfeDAO.Create(FConexao);
+    infeIemDAO := TDocumentoNfeItemDAO.Create(FConexao);
+    TNfeXmlParser.LerXml(pArquivo, docNFeDTO);
+
+    docNFeDTO.STATUS_PROC := STATUS_NOVO;
+
+    if docNFeDTO.CHAVE_ACESSO = EmptyStr then
+      docNFeDTO.STATUS_PROC := STATUS_ERRO
+    else if docNFeDAO.obterDocumentoPorChave(docNFeDTO.CHAVE_ACESSO, TDocumentoNfeDTO.Create) then
+      raise Exception.Create('NF-e já importada')
+    else if (docNFeDTO.EMIT_CNPJ_CPF = '') or (docNFeDTO.DEST_CNPJ_CPF = '') then
+      docNFeDTO.STATUS_PROC := STATUS_PENDENTE_REVISAO
+    else if docNFeDTO.LISTA_ITENS.Count = 0 then
+      docNFeDTO.STATUS_PROC := STATUS_ERRO
+    else
+      docNFeDTO.STATUS_PROC := STATUS_PROCESSADO;
+
+    docNFeDTO.DT_IMPORTACAO := Now;
+    docNFeDTO.ARQUIVO_NOME := ExtractFileName(pArquivo);
+    docNFeDTO.XML_CONTEUDO := TStringList.Create.Text;
+
+    Result := docNFeDAO.gravarDocumento(docNFeDTO);
+
+    for i := 0 to docNFeDTO.LISTA_ITENS.Count - 1 do
+    begin
+      TDocumentoNfeItemDTO(docNFeDTO.LISTA_ITENS[i]).ID_DOCUMENTO := Result;
+      infeIemDAO.gravarItem(TDocumentoNfeItemDTO(docNFeDTO.LISTA_ITENS[i]));
+    end;
+
+    RegistrarEvento(Result, 'IMPORTACAO', '', docNFeDTO.STATUS_PROC, 'Importação realizada', '');
+  finally
+    docNFeDTO.Destroy;
+    docNFeDAO.Free;
+    infeIemDAO.Free;
+  end;
+end;
+
+procedure TImportacaoNfeController.Reprocessar(pIdDocumento: Integer);
+var
+  docNFeDAO: TDocumentoNfeDAO;
+  docNFeDTO: TDocumentoNfeDTO;
+  statusAnterior: string;
+begin
+  try
+    docNFeDAO := TDocumentoNfeDAO.Create(FConexao);
+    docNFeDTO := TDocumentoNfeDTO.Create;
+
+//    if docNFeDAO.obterDocumentoPorChave(docNFeDTO.CHAVE_ACESSO, TDocumentoNfeDTO.Create) then
+//    begin
+//      raise Exception.Create('NF-e já importada');
+//    end;
+
+    if docNFeDAO.obterDocumentoPorID(pIdDocumento, docNFeDTO) then
+    begin
+      statusAnterior := docNFeDTO.STATUS_PROC;
+      docNFeDTO.STATUS_PROC := STATUS_REPROCESSADO;
+
+      if docNFeDTO.CHAVE_ACESSO = '' then
+        docNFeDTO.STATUS_PROC := STATUS_ERRO
+      else if docNFeDAO.obterDocumentoPorChave(docNFeDTO.CHAVE_ACESSO, TDocumentoNfeDTO.Create) then
+        raise Exception.Create('NF-e já importada')
+      else if (docNFeDTO.EMIT_CNPJ_CPF = '') or (docNFeDTO.DEST_CNPJ_CPF = '') then
+        docNFeDTO.STATUS_PROC := STATUS_PENDENTE_REVISAO
+      else if docNFeDTO.LISTA_ITENS.Count = 0 then
+        docNFeDTO.STATUS_PROC := STATUS_ERRO
+      else
+        docNFeDTO.STATUS_PROC := STATUS_PROCESSADO;
+
+      docNFeDAO.gravarDocumento(docNFeDTO);
+
+      RegistrarEvento(
+        pIdDocumento,
+        'REPROCESSAMENTO',
+        statusAnterior,
+        STATUS_REPROCESSADO,
+        'Documento reprocessado',
+        ''
+      );
+    end;
+  finally
+    docNFeDTO.Free;
+    docNFeDAO.Free;
+  end;
+end;
+
+end.
+
+
+

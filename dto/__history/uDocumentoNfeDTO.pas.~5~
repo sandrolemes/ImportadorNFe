@@ -1,0 +1,50 @@
+unit uDocumentoNfeDTO;
+
+interface
+
+uses
+  System.SysUtils, System.Classes;
+
+type
+  TDocumentoNfeDTO = class
+  private
+    FID_DOCUMENTO: Integer;
+    FCHAVE_ACESSO: string;
+    FNUMERO: string;
+    FSERIE: string;
+    FDT_EMISSAO: TDateTime;
+    FEMIT_CNPJ_CPF: string;
+    FEMIT_RAZAO: string;
+    FDEST_CNPJ_CPF: string;
+    FDEST_RAZAO: string;
+    FVL_TOTAL: Currency;
+    FSTATUS_PROC: string;
+    FMSG_STATUS: string;
+    FARQUIVO_NOME: string;
+    FXML_CONTEUDO: string;
+    FDT_IMPORTACAO: TDateTime;
+    FLISTA_ITENS: TList;
+  public
+    property ID_DOCUMENTO: Integer read FID_DOCUMENTO write FID_DOCUMENTO;
+    property CHAVE_ACESSO: string read FCHAVE_ACESSO write FCHAVE_ACESSO;
+    property NUMERO: string read FNUMERO write FNUMERO;
+    property SERIE: string read FSERIE write FSERIE;
+    property DT_EMISSAO: TDateTime read FDT_EMISSAO write FDT_EMISSAO;
+    property EMIT_CNPJ_CPF: string read FEMIT_CNPJ_CPF write FEMIT_CNPJ_CPF;
+    property EMIT_RAZAO: string read FEMIT_RAZAO write FEMIT_RAZAO;
+    property DEST_CNPJ_CPF: string read FDEST_CNPJ_CPF write FDEST_CNPJ_CPF;
+    property DEST_RAZAO: string read FDEST_RAZAO write FDEST_RAZAO;
+    property VL_TOTAL: Currency read FVL_TOTAL write FVL_TOTAL;
+    property STATUS_PROC: string read FSTATUS_PROC write FSTATUS_PROC;
+    property MSG_STATUS: string read FMSG_STATUS write FMSG_STATUS;
+    property ARQUIVO_NOME: string read FARQUIVO_NOME write FARQUIVO_NOME;
+    property XML_CONTEUDO: string read FXML_CONTEUDO write FXML_CONTEUDO;
+    property DT_IMPORTACAO: TDateTime read FDT_IMPORTACAO write FDT_IMPORTACAO;
+    property LISTA_ITENS: TList read FLISTA_ITENS write FLISTA_ITENS;
+
+    constructor Create;
+  end;
+
+implementation
+
+end.

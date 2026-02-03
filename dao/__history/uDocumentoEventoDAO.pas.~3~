@@ -1,0 +1,75 @@
+unit uDocumentoEventoDAO;
+
+interface
+
+uses
+  System.SysUtils,
+  FireDAC.Comp.Client,
+  uDocumentoEventoDTO;
+
+type
+  TDocumentoEventoDAO = class
+  private
+    FConexao: TFDConnection;
+    function ProximoID: Integer;
+  public
+    constructor Create(AConexao: TFDConnection);
+
+    function gravarEvento(ADTO: TDocumentoEventoDTO): Integer;
+  end;
+
+implementation
+
+constructor TDocumentoEventoDAO.Create(AConexao: TFDConnection);
+begin
+  FConexao := AConexao;
+end;
+
+function TDocumentoEventoDAO.ProximoID: Integer;
+var
+  qrSql: TFDQuery;
+begin
+  qrSql := TFDQuery.Create(nil);
+  try
+    qrSql.Connection := FConexao;
+    qrSql.SQL.Clear;
+    qrSql.SQL.Add('SELECT NEXT VALUE FOR GEN_DOCUMENTO_EVENTO FROM RDB$DATABASE');
+    qrSql.Open;
+    Result := qrSql.Fields[0].AsInteger;
+  finally
+    qrSql.Free;
+  end;
+end;
+
+function TDocumentoEventoDAO.gravarEvento(ADTO: TDocumentoEventoDTO): Integer;
+var
+  qrSql: TFDQuery;
+begin
+  try
+    qrSql := TFDQuery.Create(nil);
+    qrSql.Connection := FConexao;
+    qrSql.SQL.Clear;
+    qrSql.SQL.Add('INSERT INTO DOCUMENTO_EVENTO (');
+    qrSql.SQL.Add('  ID_EVENTO, ID_DOCUMENTO, DT_EVENTO, TIPO_EVENTO,');
+    qrSql.SQL.Add('  STATUS_ANTES, STATUS_DEPOIS, MENSAGEM, DETALHE, USUARIO');
+    qrSql.SQL.Add(') VALUES (');
+    qrSql.SQL.Add('  :ID, :ID_DOC, :DT, :TIPO, :ANTES, :DEPOIS, :MSG, :DET, :USR');
+    qrSql.SQL.Add(')');
+
+    qrSql.ParamByName('ID').AsInteger := ProximoID;
+    qrSql.ParamByName('ID_DOC').AsInteger := ADTO.ID_DOCUMENTO;
+    qrSql.ParamByName('DT').AsDateTime := ADTO.DT_EVENTO;
+    qrSql.ParamByName('TIPO').AsString := ADTO.TIPO_EVENTO;
+    qrSql.ParamByName('ANTES').AsString := ADTO.STATUS_ANTES;
+    qrSql.ParamByName('DEPOIS').AsString := ADTO.STATUS_DEPOIS;
+    qrSql.ParamByName('MSG').AsString := ADTO.MENSAGEM;
+    qrSql.ParamByName('DET').AsString := ADTO.DETALHE;
+    qrSql.ParamByName('USR').AsString := ADTO.USUARIO;
+
+    qrSql.ExecSQL;
+  finally
+    qrSql.Free;
+  end;
+end;
+
+end.

@@ -1,0 +1,212 @@
+﻿unit fImportacaoNfe;
+
+interface
+
+uses
+  Winapi.Windows,
+  Winapi.Messages,
+  System.SysUtils,
+  System.Classes,
+  Vcl.Forms,
+  Vcl.Controls,
+  Vcl.StdCtrls,
+  Vcl.ExtCtrls,
+  Vcl.Dialogs,
+  Vcl.DBGrids,
+  Vcl.Grids,
+  Data.DB,
+  FireDAC.Comp.Client,
+  FireDAC.Stan.Intf,
+  FireDAC.Stan.Option,
+  FireDAC.Stan.Param,
+  FireDAC.Stan.Error,
+  FireDAC.DatS,
+  FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf,
+  FireDAC.Stan.Async,
+  FireDAC.DApt,
+  FireDAC.Comp.DataSet,
+  FireDAC.Stan.Def,
+  FireDAC.Phys.FBDef,
+  FireDAC.Phys,
+  FireDAC.Phys.IBBase,
+  FireDAC.Phys.FB,
+  FireDAC.UI.Intf,
+  FireDAC.VCLUI.Wait,
+  FireDAC.Comp.UI,
+  uStatusProcessamento,
+  uImportacaoNfeController, Vcl.ComCtrls;
+
+type
+  TfrmImportacaoNfe = class(TForm)
+    btnSelecionarXml: TButton;
+    OpenDialogXml: TOpenDialog;
+    qryDocumentos: TFDQuery;
+    qryItens: TFDQuery;
+    qryEventos: TFDQuery;
+    dsDocumentos: TDataSource;
+    dsItens: TDataSource;
+    dsEventos: TDataSource;
+    GroupBox1: TGroupBox;
+    grdDocumentos: TDBGrid;
+    btnReprocessar: TButton;
+    PageControl1: TPageControl;
+    TabSheet1: TTabSheet;
+    tsEventosHistorico: TTabSheet;
+    grdEventos: TDBGrid;
+    grdItens: TDBGrid;
+    btnImportar: TButton;
+    procedure FormCreate(Sender: TObject);
+    procedure btnSelecionarXmlClick(Sender: TObject);
+    procedure btnImportarClick(Sender: TObject);
+    procedure btnReprocessarClick(Sender: TObject);
+    procedure grdDocumentosCellClick(Column: TColumn);
+  private
+    FConexao: TFDConnection;
+    FController: TImportacaoNfeController;
+    FArqXml: string;
+    procedure ConfigurarConexao;
+    procedure CarregarDocumentos;
+    procedure CarregarItensEEventos(pIdDocumento: Integer);
+  public
+  end;
+
+var
+  frmImportacaoNfe: TfrmImportacaoNfe;
+
+implementation
+
+{$R *.dfm}
+
+{ TfrmImportacaoNfe }
+
+procedure TfrmImportacaoNfe.FormCreate(Sender: TObject);
+begin
+  ConfigurarConexao;
+  FController := TImportacaoNfeController.Create(FConexao);
+  CarregarDocumentos;
+end;
+
+procedure TfrmImportacaoNfe.ConfigurarConexao;
+begin
+  FConexao := TFDConnection.Create(nil);
+  FConexao.DriverName := 'FB';
+  FConexao.Params.Database := ExtractFilePath(ParamStr(0)) + '\DB\BANCO.FDB'; // ajuste se necessário
+  FConexao.Params.UserName := 'SYSDBA';
+  FConexao.Params.Password := 'masterkey';
+  FConexao.Params.Add('Server=localhost');
+  FConexao.LoginPrompt := False;
+  FConexao.Connected := True;
+
+  qryDocumentos.Connection := FConexao;
+  qryItens.Connection := FConexao;
+  qryEventos.Connection := FConexao;
+end;
+
+procedure TfrmImportacaoNfe.CarregarDocumentos;
+begin
+  qryDocumentos.Close;
+  qryDocumentos.SQL.Clear;
+  qryDocumentos.SQL.Add('SELECT');
+  qryDocumentos.SQL.Add('  ID_DOCUMENTO,');
+  qryDocumentos.SQL.Add('  CHAVE_ACESSO,');
+  qryDocumentos.SQL.Add('  EMIT_RAZAO,');
+  qryDocumentos.SQL.Add('  VL_TOTAL,');
+  qryDocumentos.SQL.Add('  STATUS_PROC');
+  qryDocumentos.SQL.Add('FROM DOCUMENTO_NFE');
+  qryDocumentos.SQL.Add('ORDER BY DT_IMPORTACAO DESC');
+  qryDocumentos.Open;
+end;
+
+procedure TfrmImportacaoNfe.CarregarItensEEventos(pIdDocumento: Integer);
+begin
+  qryItens.Close;
+  qryItens.SQL.Clear;
+  qryItens.SQL.Add('SELECT');
+  qryItens.SQL.Add('  ITEM,');
+  qryItens.SQL.Add('  DESCRICAO,');
+  qryItens.SQL.Add('  NCM,');
+  qryItens.SQL.Add('  QUANTIDADE,');
+  qryItens.SQL.Add('  VL_UNITARIO,');
+  qryItens.SQL.Add('  VL_TOTAL');
+  qryItens.SQL.Add('FROM DOCUMENTO_NFE_ITEM');
+  qryItens.SQL.Add('WHERE ID_DOCUMENTO = :ID_DOCUMENTO');
+  qryItens.SQL.Add('ORDER BY ITEM');
+  qryItens.ParamByName('ID_DOCUMENTO').AsInteger := pIdDocumento;
+  qryItens.Open;
+
+  qryEventos.Close;
+  qryEventos.SQL.Clear;
+  qryEventos.SQL.Add('SELECT');
+  qryEventos.SQL.Add('  DT_EVENTO,');
+  qryEventos.SQL.Add('  TIPO_EVENTO,');
+  qryEventos.SQL.Add('  STATUS_ANTES,');
+  qryEventos.SQL.Add('  STATUS_DEPOIS,');
+  qryEventos.SQL.Add('  MENSAGEM');
+  qryEventos.SQL.Add('FROM DOCUMENTO_EVENTO');
+  qryEventos.SQL.Add('WHERE ID_DOCUMENTO = :ID_DOCUMENTO');
+  qryEventos.SQL.Add('ORDER BY DT_EVENTO');
+  qryEventos.ParamByName('ID_DOCUMENTO').AsInteger := pIdDocumento;
+  qryEventos.Open;
+end;
+
+procedure TfrmImportacaoNfe.btnSelecionarXmlClick(Sender: TObject);
+begin
+  if OpenDialogXml.Execute then
+    edtXmlSelecionado.Text := OpenDialogXml.FileName;
+end;
+
+procedure TfrmImportacaoNfe.btnImportarClick(Sender: TObject);
+begin
+  if Trim(edtXmlSelecionado.Text) = EmptyStr then
+  begin
+    MessageDlg('Selecione um arquivo XML.', mtWarning, [mbOK], 0);
+    Exit;
+  end;
+
+  try
+    FController.ImportarXml(edtXmlSelecionado.Text);
+    CarregarDocumentos;
+    edtXmlSelecionado.Clear;
+    MessageDlg('XML importado com sucesso.', mtInformation, [mbOK], 0);
+  except
+    on E: Exception do
+      MessageDlg(E.Message, mtError, [mbOK], 0);
+  end;
+end;
+
+procedure TfrmImportacaoNfe.btnReprocessarClick(Sender: TObject);
+var
+  ID: Integer;
+begin
+  if qryDocumentos.IsEmpty then
+    Exit;
+
+  ID := qryDocumentos.FieldByName('ID_DOCUMENTO').AsInteger;
+
+  try
+    FController.Reprocessar(ID);
+    CarregarDocumentos;
+    CarregarItensEEventos(ID);
+    MessageDlg('Documento reprocessado com sucesso.', mtInformation, [mbOK], 0);
+  except
+    on E: Exception do
+      MessageDlg(E.Message, mtError, [mbOK], 0);
+  end;
+end;
+
+procedure TfrmImportacaoNfe.grdDocumentosCellClick(Column: TColumn);
+begin
+  if qryDocumentos.IsEmpty then
+    Exit;
+
+  btnReprocessar.Enabled := (
+    (qryDocumentos.FieldByName('STATUS_PROC').AsString = STATUS_NOVO) or
+    (qryDocumentos.FieldByName('STATUS_PROC').AsString = STATUS_ERRO) or
+    (qryDocumentos.FieldByName('STATUS_PROC').AsString = STATUS_PENDENTE_REVISAO)
+  );
+
+  CarregarItensEEventos( qryDocumentos.FieldByName('ID_DOCUMENTO').AsInteger );
+end;
+
+end.

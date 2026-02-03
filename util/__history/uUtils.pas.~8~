@@ -1,0 +1,60 @@
+unit uUtils;
+
+interface
+
+uses
+  System.SysUtils;
+
+  function XmlIso8601ToDateTime(const AValue: string): TDateTime;
+  function XmlStrToFloat(const AValue: string): Double;
+
+
+implementation
+
+
+function XmlIso8601ToDateTime(const AValue: string): TDateTime;
+var
+  S: string;
+begin
+  Result := 0;
+
+  if AValue = '' then
+    Exit;
+
+  // Remove timezone (ex: -03:00)
+  S := AValue;
+  if Pos('-', Copy(S, 20, Length(S))) > 0 then
+    S := Copy(S, 1, 19);
+
+  // yyyy-mm-ddThh:nn:ss
+  S[11] := ' ';
+
+  Result := StrToDateTimeDef(S, 0);
+end;
+
+function XmlStrToFloat(const AValue: string): Double;
+var
+  FS: TFormatSettings;
+begin
+  FS := TFormatSettings.Create;
+  FS.DecimalSeparator := '.';
+  FS.ThousandSeparator := #0;
+
+  Result := StrToFloatDef(AValue, 0, FS);
+end;
+
+function retornarApenasNumeros(const pString: string): string;
+var
+  I: Integer;
+begin
+  Result := '';
+  for I := 1 to Length(pString) do
+    if pString[I] in ['0'..'9'] then
+      Result := Result + pString[I];
+
+  if Length(Result) <> 44 then
+    Result := '';
+end;
+
+
+end.
