@@ -1,35 +1,6 @@
 # ImportadorNFe
 Importação de XML de NF-e
 
-## Estrutura
-ImportadorNFe/
-│
-├── ImportadorNFe.dpr
-│
-├── dto/
-│   ├── uDocumentoNfeDTO.pas
-│   ├── uDocumentoNfeItemDTO.pas
-│   └── uDocumentoEventoDTO.pas
-│ 
-├── dao/
-│   ├── uDocumentoNfeDAO.pas
-│   ├── uDocumentoNfeItemDAO.pas
-│   └── uDocumentoEventoDAO.pas
-│
-├── controller/
-│   └── uImportacaoNfeController.pas
-│
-├── service/
-│   └── uNfeXmlParser.pas
-│
-├── util/
-│   ├── uStatusProcessamento.pas
-│   └── uUtils.pas
-│
-└── view/
-    └── fImportacaoNfe.pas / .dfm
-
-
 ## Descrição
 Projeto desenvolvido como teste técnico para importação de XML de NF-e,
 simulando um mini processo de integração ERP, com controle de estados,
