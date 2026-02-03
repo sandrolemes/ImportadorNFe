@@ -42,3 +42,17 @@ registrando histórico de status anterior e posterior.
 ## Convenção de Código
 Todo o código Delphi segue convenção de nomenclatura em camel case,
 conforme boas práticas e padronização definida no projeto.
+
+## Uso de Inteligência Artificial no Desenvolvimento
+Ferramentas de Inteligência Artificial (ChatGPT) foram utilizadas como
+suporte durante o desenvolvimento, principalmente para acelerar a
+estruturação inicial do projeto, revisão de padrões de código e
+organização das camadas da aplicação.
+
+Todas as implementações passaram por validação humana criteriosa,
+incluindo ajustes manuais, correções técnicas, testes de compilação
+e adequação às regras de negócio do domínio fiscal (NF-e).
+
+As decisões finais de arquitetura, regras de negócio, validações e
+tratamento de dados foram tomadas conscientemente pelo desenvolvedor,
+assumindo integralmente a autoria técnica da solução.

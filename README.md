@@ -1,6 +1,35 @@
 # ImportadorNFe
 Importação de XML de NF-e
 
+## Estrutura
+ImportadorNFe/
+│
+├── ImportadorNFe.dpr
+│
+├── dto/
+│   ├── uDocumentoNfeDTO.pas
+│   ├── uDocumentoNfeItemDTO.pas
+│   └── uDocumentoEventoDTO.pas
+│
+├── dao/
+│   ├── uDocumentoNfeDAO.pas
+│   ├── uDocumentoNfeItemDAO.pas
+│   └── uDocumentoEventoDAO.pas
+│
+├── controller/
+│   └── uImportacaoNfeController.pas
+│
+├── service/
+│   └── uNfeXmlParser.pas
+│
+├── util/
+│   ├── uStatusProcessamento.pas
+│   └── uUtils.pas
+│
+└── view/
+    └── fImportacaoNfe.pas / .dfm
+
+
 ## Descrição
 Projeto desenvolvido como teste técnico para importação de XML de NF-e,
 simulando um mini processo de integração ERP, com controle de estados,
@@ -18,6 +47,21 @@ rastreabilidade e reprocessamento.
 - controller: regras de negócio e fluxo
 - service: leitura e interpretação do XML NF-e
 - view: interface VCL
+
+## Uso de Inteligência Artificial
+
+O desenvolvimento deste projeto contou com o apoio de ferramentas de
+Inteligência Artificial (ChatGPT) como auxílio na organização inicial,
+estruturação do código e revisão de boas práticas.
+
+Todo o código gerado foi cuidadosamente analisado, validado, ajustado
+e testado manualmente pelo desenvolvedor, que foi responsável final
+pelas decisões técnicas, regras de negócio e correções necessárias.
+
+A utilização da IA foi tratada como uma ferramenta de produtividade,
+não substituindo a análise crítica, o conhecimento técnico e a
+responsabilidade humana sobre a solução entregue.
+
 
 ## Configuração do Banco de Dados
 1. Criar o banco Firebird 3 (exemplo):
