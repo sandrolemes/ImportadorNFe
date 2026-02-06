@@ -11,21 +11,21 @@
     <Transaction>2025/12/17 17:19:42.000.187,=C:\Users\sandr\OneDrive\Documentos\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
     <Transaction>2025/12/17 18:06:26.000.763,=C:\Users\sandr\OneDrive\Documentos\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
     <Transaction>2026/02/02 14:58:14.000.510,=C:\Users\sandr\OneDrive\Documentos\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
-    <Transaction>2026/02/02 14:58:44.000.263,D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\Unit1.dfm=C:\Users\sandr\OneDrive\Documentos\Embarcadero\Studio\Projects\Unit1.dfm</Transaction>
-    <Transaction>2026/02/02 14:58:44.000.263,D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\Unit1.pas=C:\Users\sandr\OneDrive\Documentos\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
-    <Transaction>2026/02/02 14:58:59.000.997,D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\projImportadorNFe.dproj=C:\Users\sandr\OneDrive\Documentos\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>2026/02/02 14:58:44.000.263,C:\Users\sandr\OneDrive\Documentos\Embarcadero\Studio\Projects\Unit1.pas=D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\Unit1.pas</Transaction>
+    <Transaction>2026/02/02 14:58:44.000.263,C:\Users\sandr\OneDrive\Documentos\Embarcadero\Studio\Projects\Unit1.dfm=D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\Unit1.dfm</Transaction>
+    <Transaction>2026/02/02 14:58:59.000.997,C:\Users\sandr\OneDrive\Documentos\Embarcadero\Studio\Projects\Project1.dproj=D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\projImportadorNFe.dproj</Transaction>
     <Transaction>2026/02/02 15:13:02.000.027,=D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\view\fImportacaoNfe.pas</Transaction>
     <Transaction>2026/02/02 15:16:21.000.012,=D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\controller\uImportacaoNfeController.pas</Transaction>
+    <Transaction>2026/02/02 15:16:32.000.350,=D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\dao\uDocumentoEventoDAO.pas</Transaction>
     <Transaction>2026/02/02 15:16:32.000.374,=D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\dao\uDocumentoNfeDAO.pas</Transaction>
     <Transaction>2026/02/02 15:16:32.000.418,=D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\dao\uDocumentoNfeItemDAO.pas</Transaction>
-    <Transaction>2026/02/02 15:16:32.000.350,=D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\dao\uDocumentoEventoDAO.pas</Transaction>
-    <Transaction>2026/02/02 15:16:41.000.295,=D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\dto\uDocumentoNfeDTO.pas</Transaction>
-    <Transaction>2026/02/02 15:16:41.000.318,=D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\dto\uDocumentoNfeItemDTO.pas</Transaction>
     <Transaction>2026/02/02 15:16:41.000.272,=D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\dto\uDocumentoEventoDTO.pas</Transaction>
+    <Transaction>2026/02/02 15:16:41.000.318,=D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\dto\uDocumentoNfeItemDTO.pas</Transaction>
+    <Transaction>2026/02/02 15:16:41.000.295,=D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\dto\uDocumentoNfeDTO.pas</Transaction>
     <Transaction>2026/02/02 15:16:46.000.996,=D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\service\uNfeXmlParser.pas</Transaction>
     <Transaction>2026/02/02 15:16:59.000.762,=D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\util\uStatusProcessamento.pas</Transaction>
     <Transaction>2026/02/02 15:26:51.000.460,=D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\Unit2.pas</Transaction>
-    <Transaction>2026/02/02 15:27:23.000.041,D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\util\uUtils.pas=D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\Unit2.pas</Transaction>
+    <Transaction>2026/02/02 15:27:23.000.041,D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\Unit2.pas=D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\util\uUtils.pas</Transaction>
     <Transaction>2026/02/02 16:12:14.000.931,D:\DesenvolvimentoGit\Delphi\SoftGran\ImportadorNFe\Unit1.pas=</Transaction>
   </Transactions>
 </BorlandProject>

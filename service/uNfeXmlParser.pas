@@ -45,13 +45,21 @@ begin
   if nodInfNFe = nil then
     raise Exception.Create('XML inválido: tag infNFe não encontrada');
 
+
+  pDocNFeDTO.XML_CONTEUDO := xmlDoc.XML.Text;
   pDocNFeDTO.CHAVE_ACESSO := uUtils.retornarApenasNumeros(nodInfNFe.Attributes['Id']);
   pDocNFeDTO.NUMERO := nodInfNFe.ChildNodes['ide'].ChildNodes['nNF'].Text;
   pDocNFeDTO.SERIE := nodInfNFe.ChildNodes['ide'].ChildNodes['serie'].Text;
   pDocNFeDTO.DT_EMISSAO := uUtils.XmlIso8601ToDateTime( nodInfNFe.ChildNodes['ide'].ChildNodes['dhEmi'].Text );
   pDocNFeDTO.EMIT_CNPJ_CPF := nodInfNFe.ChildNodes['emit'].ChildNodes.FindNode('CNPJ').Text;
   pDocNFeDTO.EMIT_RAZAO := nodInfNFe.ChildNodes['emit'].ChildNodes['xNome'].Text;
-  pDocNFeDTO.DEST_CNPJ_CPF := nodInfNFe.ChildNodes['dest'].ChildNodes.FindNode('CNPJ').Text;
+
+  if nodInfNFe.ChildNodes['dest'].HasAttribute('CNPJ') then
+    pDocNFeDTO.DEST_CNPJ_CPF := nodInfNFe.ChildNodes['dest'].ChildNodes.FindNode('CNPJ').Text
+  else
+    pDocNFeDTO.DEST_CNPJ_CPF := nodInfNFe.ChildNodes['dest'].ChildNodes.FindNode('CPF').Text;
+
+
   pDocNFeDTO.DEST_RAZAO := nodInfNFe.ChildNodes['dest'].ChildNodes['xNome'].Text;
 
   pDocNFeDTO.VL_TOTAL := uUtils.XmlStrToFloat( nodInfNFe.ChildNodes['total'].ChildNodes['ICMSTot'].ChildNodes['vNF'].Text );

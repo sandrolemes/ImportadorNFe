@@ -90,7 +90,6 @@ begin
 
     docNFeDTO.DT_IMPORTACAO := Now;
     docNFeDTO.ARQUIVO_NOME := ExtractFileName(pArquivo);
-    docNFeDTO.XML_CONTEUDO := TStringList.Create.Text;
 
     Result := docNFeDAO.gravarDocumento(docNFeDTO);
 

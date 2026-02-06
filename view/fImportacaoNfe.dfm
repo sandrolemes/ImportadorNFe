@@ -60,7 +60,7 @@ object frmImportacaoNfe: TfrmImportacaoNfe
       Top = 270
       Width = 1024
       Height = 328
-      ActivePage = tsEventosHistorico
+      ActivePage = TabSheet1
       TabOrder = 3
       object TabSheet1: TTabSheet
         Caption = 'Item(ns)'

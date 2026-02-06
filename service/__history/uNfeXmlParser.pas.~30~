@@ -1,0 +1,82 @@
+﻿unit uNfeXmlParser;
+
+interface
+
+uses
+  System.SysUtils,
+  System.Classes,
+  Xml.XMLDoc,
+  Xml.XMLIntf,
+  uDocumentoNfeDTO,
+  uDocumentoNfeItemDTO;
+
+type
+  TNfeXmlParser = class
+  public
+    class procedure LerXml(const pArquivo: string; pDocNFeDTO: TDocumentoNfeDTO);
+  end;
+
+
+implementation
+
+
+uses
+  uUtils;
+
+
+class procedure TNfeXmlParser.LerXml(const pArquivo: string; pDocNFeDTO: TDocumentoNfeDTO);
+var
+  xmlDoc: IXMLDocument;
+  nodNFe: IXMLNode;
+  nodInfNFe: IXMLNode;
+  nodDet: IXMLNode;
+  i: Integer;
+  docNFeItemDTO: TDocumentoNfeItemDTO;
+begin
+  xmlDoc := TXMLDocument.Create(nil);
+  xmlDoc.LoadFromFile(pArquivo);
+  xmlDoc.Active := True;
+
+  nodNFe := xmlDoc.DocumentElement.ChildNodes.FindNode('NFe');
+  if nodNFe = nil then
+    raise Exception.Create('XML inválido: tag NFe não encontrada');
+
+  nodInfNFe := nodNFe.ChildNodes.FindNode('infNFe');
+  if nodInfNFe = nil then
+    raise Exception.Create('XML inválido: tag infNFe não encontrada');
+
+
+  pDocNFeDTO.XML_CONTEUDO := xmlDoc.XML;
+  pDocNFeDTO.CHAVE_ACESSO := uUtils.retornarApenasNumeros(nodInfNFe.Attributes['Id']);
+  pDocNFeDTO.NUMERO := nodInfNFe.ChildNodes['ide'].ChildNodes['nNF'].Text;
+  pDocNFeDTO.SERIE := nodInfNFe.ChildNodes['ide'].ChildNodes['serie'].Text;
+  pDocNFeDTO.DT_EMISSAO := uUtils.XmlIso8601ToDateTime( nodInfNFe.ChildNodes['ide'].ChildNodes['dhEmi'].Text );
+  pDocNFeDTO.EMIT_CNPJ_CPF := nodInfNFe.ChildNodes['emit'].ChildNodes.FindNode('CNPJ').Text;
+  pDocNFeDTO.EMIT_RAZAO := nodInfNFe.ChildNodes['emit'].ChildNodes['xNome'].Text;
+  pDocNFeDTO.DEST_CNPJ_CPF := nodInfNFe.ChildNodes['dest'].ChildNodes.FindNode('CNPJ').Text;
+  pDocNFeDTO.DEST_RAZAO := nodInfNFe.ChildNodes['dest'].ChildNodes['xNome'].Text;
+
+  pDocNFeDTO.VL_TOTAL := uUtils.XmlStrToFloat( nodInfNFe.ChildNodes['total'].ChildNodes['ICMSTot'].ChildNodes['vNF'].Text );
+
+  for i := 0 to nodInfNFe.ChildNodes.Count - 1 do
+  begin
+    if nodInfNFe.ChildNodes[i].NodeName = 'det' then
+    begin
+      nodDet := nodInfNFe.ChildNodes[i];
+      docNFeItemDTO := TDocumentoNfeItemDTO.Create;
+
+      docNFeItemDTO.ITEM := StrToIntDef(nodDet.Attributes['nItem'], i + 1);
+      docNFeItemDTO.DESCRICAO := nodDet.ChildNodes['prod'].ChildNodes['xProd'].Text;
+      docNFeItemDTO.NCM := nodDet.ChildNodes['prod'].ChildNodes.FindNode('NCM').Text;
+      docNFeItemDTO.QUANTIDADE := uUtils.XmlStrToFloat( nodDet.ChildNodes['prod'].ChildNodes['qCom'].Text );
+      docNFeItemDTO.VL_UNITARIO := uUtils.XmlStrToFloat( nodDet.ChildNodes['prod'].ChildNodes['vUnCom'].Text );
+      docNFeItemDTO.VL_TOTAL := uUtils.XmlStrToFloat( nodDet.ChildNodes['prod'].ChildNodes['vProd'].Text );
+
+      pDocNFeDTO.LISTA_ITENS.Add( docNFeItemDTO );
+    end;
+  end;
+end;
+
+end.
+
+

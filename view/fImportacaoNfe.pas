@@ -116,6 +116,31 @@ begin
   qryDocumentos.Open;
 end;
 
+procedure TfrmImportacaoNfe.btnImportarClick(Sender: TObject);
+begin
+  if OpenDialogXml.Execute then
+  begin
+    FArqXml := OpenDialogXml.FileName;
+
+    if Trim(FArqXml) = EmptyStr then
+    begin
+      MessageDlg('Selecione um arquivo XML.', mtWarning, [mbOK], 0);
+      Exit;
+    end;
+
+    try
+      FController.ImportarXml(FArqXml);
+      CarregarDocumentos;
+      FArqXml := EmptyStr;
+      MessageDlg('XML importado com sucesso.', mtInformation, [mbOK], 0);
+    except
+      on E: Exception do
+        MessageDlg(E.Message, mtError, [mbOK], 0);
+    end;
+  end;
+
+end;
+
 procedure TfrmImportacaoNfe.CarregarItensEEventos(pIdDocumento: Integer);
 begin
   qryItens.Close;
@@ -146,31 +171,6 @@ begin
   qryEventos.SQL.Add('ORDER BY DT_EVENTO');
   qryEventos.ParamByName('ID_DOCUMENTO').AsInteger := pIdDocumento;
   qryEventos.Open;
-end;
-
-procedure TfrmImportacaoNfe.btnImportarClick(Sender: TObject);
-begin
-  if OpenDialogXml.Execute then
-  begin
-    FArqXml := OpenDialogXml.FileName;
-
-    if Trim(FArqXml) = EmptyStr then
-    begin
-      MessageDlg('Selecione um arquivo XML.', mtWarning, [mbOK], 0);
-      Exit;
-    end;
-
-    try
-      FController.ImportarXml(FArqXml);
-      CarregarDocumentos;
-      FArqXml := EmptyStr;
-      MessageDlg('XML importado com sucesso.', mtInformation, [mbOK], 0);
-    except
-      on E: Exception do
-        MessageDlg(E.Message, mtError, [mbOK], 0);
-    end;
-  end;
-
 end;
 
 procedure TfrmImportacaoNfe.btnReprocessarClick(Sender: TObject);
